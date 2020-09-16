@@ -22,11 +22,32 @@ public class LCM {
     }
   }
 
-  private static int lcm_fast(int a, int b){
-    return a*b/gcd_fast(a,b);
+  private static long lcm_fast(int a, int b){
+
+    long gcd = gcd_fast(a,b);
+//    long ab = a*b;
+//    long result = ab/gcd;
+//    return result;
+    return a/gcd*b;
   }
 
   public static void main(String args[]) {
+//    while (true){
+//      int a = new Random().nextInt(10000000)+1;
+//      int b = new Random().nextInt(10000000)+1;
+//      System.out.println("a="+a+",b="+b);
+//      long fast = lcm_fast(a,b);
+//      long naive = lcm_naive(a,b);
+//      if(fast!=naive){
+//        System.out.println("not same,fast="+fast+",naive="+naive);
+//        break;
+//      } else
+//      {
+//        System.out.println("OK");
+//      }
+//    }
+
+
     Scanner scanner = new Scanner(System.in);
     int a = scanner.nextInt();
     int b = scanner.nextInt();
