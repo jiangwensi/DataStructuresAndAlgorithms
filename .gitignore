@@ -1,3 +1,8 @@
-/*
-!.gitignore
-!Algorithmic Toolbox/week2_algorithmic_warmup
+AlgorithmicToolbox/**
+
+!AlgorithmicToolbox/week2_algorithmic_warmup/
+!AlgorithmicToolbox/week2_algorithmic_warmup/**
+AlgorithmicToolbox/week2_algorithmic_warmup/**
+
+!AlgorithmicToolbox/week2_algorithmic_warmup/src/
+!AlgorithmicToolbox/week2_algorithmic_warmup/src/**
