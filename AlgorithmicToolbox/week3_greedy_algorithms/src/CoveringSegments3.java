@@ -1,7 +1,13 @@
+import javax.swing.text.Segment;
+import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class CoveringSegments {
+public class CoveringSegments3 {
+   private static List<Point> result = new ArrayList<>();
 
     private static Point getPoint(List<Point> points, int coordinate) {
 
@@ -13,75 +19,80 @@ public class CoveringSegments {
         }
     }
 
-    private static boolean stillHasUnmarkedSegments(Segment[] segments) {
-        return Arrays.stream(segments).filter(s -> s.marked == false).collect(Collectors.toList()).size() > 0;
-    }
+//    private static boolean stillHasUnmarkedSegments(Segment[] segments) {
+//        return Arrays.stream(segments).filter(s -> s.marked == false).collect(Collectors.toList()).size() > 0;
+//    }
 
     private static int[] optimalPoints(Segment[] segments) {
         //key = point coordinate
         //value = point
         int count = 0;
-        List<Point> result = new ArrayList<>();
-        List<Point> allPoints = new ArrayList<>();
+        Map<Integer,Point> allPoints = new HashMap<>();
+        List<Segment> segmentList = new ArrayList();
+        Arrays.stream(segments).forEach(e->segmentList.add(e));
 
         //init points with 0 intersecting segments
-        for (Segment s : segments) {
+        for (Segment s : segmentList) {
             int start = s.start;
             int end = s.end;
 
-            Point p = getPoint(allPoints, start);
+            Point p = allPoints.get(start);
             if (p == null) {
                 p = new Point();
                 p.coordinate = start;
-                allPoints.add(p);
+                allPoints.put(p.coordinate,p);
             }
 //            p.numberOfIntersectSegments++;
 //            p.segments.add(s);
 
-            p = getPoint(allPoints, end);
+            p = allPoints.get(end);
             if (p == null) {
                 p = new Point();
                 p.coordinate = end;
-                allPoints.add(p);
+                allPoints.put(p.coordinate,p);
             }
 //            p.numberOfIntersectSegments++;
 //            p.segments.add(s);
         }
 
         //update points with segments
-        for (Point p : allPoints) {
-            for (Segment s : segments) {
-                if (s.start <= p.coordinate && s.end >= p.coordinate) {
-                    p.segments.add(s);
+        for(Segment s: segments){
+            for(int i =s.start; i<=s.end; i++){
+                if(allPoints.get(i)!=null){
+                    allPoints.get(i).segments.add(s);
                 }
             }
+//            allPoints.get(s.end).segments.add(s);
+//            allPoints.get(s.start).segments.add(s);
         }
-        Collections.sort(allPoints, new Comparator<Point>() {
-            @Override
-            public int compare(Point o1, Point o2) {
-                if (o1.segments.size() > o2.segments.size()) {
-                    return -1;
-                } else if (o1.segments.size() == o2.segments.size()) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            }
-        });
 
-        while (stillHasUnmarkedSegments(segments)) {
-            for (Point p : allPoints) {
-                if (!p.marked) {
-                    result.add(p);
-                    p.segments.forEach(s -> {
-                        s.marked = true;
-                        allPoints.stream().filter(e -> e.coordinate == s.start || e.coordinate == s.end).forEach(e -> e.marked =
-                                true);
-                    });
-                    p.marked = true;
-                    count++;
-                }
+        allPoints = allPoints.entrySet().stream().sorted((o1, o2)->{
+            if(o1.getValue().segments.size()<o2.getValue().segments.size()){
+                return 1;
+            } else if(o1.getValue().segments.size()>o2.getValue().segments.size()){
+                return -1;
+            } else {
+                return 0;
             }
+        }).collect(Collectors.toMap(e->e.getKey(),e->e.getValue(),(e1,e2)->e1,LinkedHashMap::new));
+
+        if (segmentList.size()>0) {
+            Point point = allPoints.entrySet().iterator().next().getValue();
+
+            result.add(point);
+
+            for (Segment s : point.segments) {
+                segmentList.remove(s);
+            }
+            count++;
+
+        }
+        if(segmentList.size()>0){
+            Segment[] remainingSegment = new Segment[segmentList.size()];
+            for(int i = 0; i < segmentList.size(); i++){
+                remainingSegment[i]=segmentList.get(i);
+            }
+            optimalPoints(remainingSegment);
         }
 
         int[] resultPoints = new int[result.size()];
@@ -93,19 +104,19 @@ public class CoveringSegments {
 
     private static class Segment {
         int start, end;
-        boolean marked = false;
+//        boolean marked = false;
 
         Segment(int start, int end) {
             this.start = start;
             this.end = end;
-            marked = false;
+//            marked = false;
         }
     }
 
     private static class Point {
         int coordinate;
-        List<CoveringSegments.Segment> segments = new ArrayList<>();
-        boolean marked = false;
+        List<CoveringSegments3.Segment> segments = new ArrayList<>();
+//        boolean marked = false;
 
         public Point() {
         }

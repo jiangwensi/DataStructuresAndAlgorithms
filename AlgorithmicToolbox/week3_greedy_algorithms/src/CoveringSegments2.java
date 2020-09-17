@@ -1,7 +1,11 @@
+import javax.swing.text.Segment;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class CoveringSegments {
+public class CoveringSegments2 {
 
     private static Point getPoint(List<Point> points, int coordinate) {
 
@@ -22,63 +26,63 @@ public class CoveringSegments {
         //value = point
         int count = 0;
         List<Point> result = new ArrayList<>();
-        List<Point> allPoints = new ArrayList<>();
+        Map<Integer,Point> allPoints = new HashMap<>();
 
         //init points with 0 intersecting segments
         for (Segment s : segments) {
             int start = s.start;
             int end = s.end;
 
-            Point p = getPoint(allPoints, start);
+            Point p = allPoints.get(start);
             if (p == null) {
                 p = new Point();
                 p.coordinate = start;
-                allPoints.add(p);
+                allPoints.put(p.coordinate,p);
             }
 //            p.numberOfIntersectSegments++;
 //            p.segments.add(s);
 
-            p = getPoint(allPoints, end);
+            p = allPoints.get(end);
             if (p == null) {
                 p = new Point();
                 p.coordinate = end;
-                allPoints.add(p);
+                allPoints.put(p.coordinate,p);
             }
 //            p.numberOfIntersectSegments++;
 //            p.segments.add(s);
         }
 
         //update points with segments
-        for (Point p : allPoints) {
-            for (Segment s : segments) {
-                if (s.start <= p.coordinate && s.end >= p.coordinate) {
-                    p.segments.add(s);
+        for(Segment s: segments){
+            for(int i =s.start; i<=s.end; i++){
+                if(allPoints.get(i)!=null){
+                    allPoints.get(i).segments.add(s);
                 }
             }
+//            allPoints.get(s.end).segments.add(s);
+//            allPoints.get(s.start).segments.add(s);
         }
-        Collections.sort(allPoints, new Comparator<Point>() {
-            @Override
-            public int compare(Point o1, Point o2) {
-                if (o1.segments.size() > o2.segments.size()) {
-                    return -1;
-                } else if (o1.segments.size() == o2.segments.size()) {
-                    return 0;
-                } else {
-                    return 1;
-                }
+
+        allPoints = allPoints.entrySet().stream().sorted((o1, o2)->{
+            if(o1.getValue().segments.size()<o2.getValue().segments.size()){
+                return 1;
+            } else if(o1.getValue().segments.size()>o2.getValue().segments.size()){
+                return -1;
+            } else {
+                return 0;
             }
-        });
+        }).collect(Collectors.toMap(e->e.getKey(),e->e.getValue(),(e1,e2)->e1,LinkedHashMap::new));
 
         while (stillHasUnmarkedSegments(segments)) {
-            for (Point p : allPoints) {
-                if (!p.marked) {
-                    result.add(p);
-                    p.segments.forEach(s -> {
+            for (Map.Entry<Integer,Point> p: allPoints.entrySet()) {
+                if (!p.getValue().marked) {
+                    result.add(p.getValue());
+                    for (Segment s : p.getValue().segments) {
                         s.marked = true;
-                        allPoints.stream().filter(e -> e.coordinate == s.start || e.coordinate == s.end).forEach(e -> e.marked =
-                                true);
-                    });
-                    p.marked = true;
+                        allPoints.get(s.start).marked = true;
+                        allPoints.get(s.end).marked = true;
+                    }
+                    p.getValue().marked = true;
                     count++;
                 }
             }
@@ -104,7 +108,7 @@ public class CoveringSegments {
 
     private static class Point {
         int coordinate;
-        List<CoveringSegments.Segment> segments = new ArrayList<>();
+        List<CoveringSegments2.Segment> segments = new ArrayList<>();
         boolean marked = false;
 
         public Point() {
