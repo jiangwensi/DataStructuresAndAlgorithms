@@ -4,7 +4,27 @@ public class DifferentSummands {
     private static List<Integer> optimalSummands(int n) {
         List<Integer> summands = new ArrayList<Integer>();
         //write your code here
+        int remaining = n;
+        int cur=0;
+        while(remaining>0){
+            int next = nextPrize(cur,remaining);
+            if(next>0){
+                remaining-=next;
+                summands.add(next);
+                cur = next;
+            } else {
+                summands.set(summands.size()-1,cur+remaining);
+                break;
+            }
+        }
         return summands;
+    }
+
+    private static int nextPrize(int curPrize,int remaining){
+        if(remaining>curPrize){
+            return curPrize+1;
+        }
+        return -1;
     }
     
     public static void main(String[] args) {
