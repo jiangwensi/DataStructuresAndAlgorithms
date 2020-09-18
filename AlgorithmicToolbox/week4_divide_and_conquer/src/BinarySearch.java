@@ -4,8 +4,6 @@ import java.util.*;
 public class BinarySearch {
 
     static int bsRecursion(int[] a, int x, int i, int j) {
-        int left = 0;
-        int right = a.length;
         int k = (i + j) / 2;
         if (a[k] == x) {
             return k;
@@ -23,9 +21,29 @@ public class BinarySearch {
         return -1;
     }
 
+    static int bsLoop(int[] a, int x) {
+        int l = 0;
+        int r = a.length-1;
+        int k = (l + r) / 2;
+        while (l <= k && k <= r) {
+            if (a[k] == x) {
+                return k;
+            }
+            if(x<a[k]){
+                r=k-1;
+            } else {
+                l=k+1;
+            }
+            k=(l+r)/2;
+        }
+
+        return -1;
+    }
+
 
     static int binarySearch(int[] a, int x) {
         return bsRecursion(a, x, 0, a.length - 1);
+//        return bsLoop(a,x);
     }
 
     static int linearSearch(int[] a, int x) {
@@ -108,8 +126,8 @@ public class BinarySearch {
                 resultLinear[i] = linearSearch(a, b[i]);
                 resultBinary[i] = binarySearch(a, b[i]);
             }
-            printArr(m,resultLinear);
-            printArr(m,resultBinary);
+            printArr(m, resultLinear);
+            printArr(m, resultBinary);
 
             for (int i = 0; i < m; i++) {
                 if (resultBinary[i] != resultLinear[i]) {
@@ -128,9 +146,9 @@ public class BinarySearch {
     }
 
     private static void printArr(int n, int[] a) {
-        System.out.print(n+" ");
-        for(int i = 0; i < a.length; i++){
-            System.out.print(a[i]+" ");
+        System.out.print(n + " ");
+        for (int i = 0; i < a.length; i++) {
+            System.out.print(a[i] + " ");
         }
         System.out.println();
     }
@@ -138,16 +156,16 @@ public class BinarySearch {
     private static int[] inputArray(int max, int n) {
         int[] a = new int[n];
         for (int i = 0; i < n; i++) {
-            boolean duplicate=false;
+            boolean duplicate = false;
             int v = new Random().nextInt(max) + 1;
-            for (int x = 0; x <i; x++) {
+            for (int x = 0; x < i; x++) {
                 if (a[x] == v) {
                     i--;
-                    duplicate=true;
+                    duplicate = true;
                     break;
                 }
             }
-            if(!duplicate){
+            if (!duplicate) {
                 a[i] = v;
             }
         }
