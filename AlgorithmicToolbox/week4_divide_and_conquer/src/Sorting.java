@@ -5,13 +5,25 @@ public class Sorting {
     private static Random random = new Random();
 
     private static int[] partition3(int[] a, int l, int r) {
-      //write your code here
+        //write your code here
+        int x = a[l];
+        int m1 = l;
+        int m2 = m1;
+        for(int i = l+1; i <=r;i++){
+            if(a[i]==x){
+                m2++;
+                swap(a,m2,i);
+            } else if(a[i]<x){
+                m1++;
+                m2++;
+                swap(a,m2,i);
+                swap(a,m1,m2);
+            }
+        }
+        swap(a,m2,l);
 
-
-      int m1 = l;
-      int m2 = r;
-      int[] m = {m1, m2};
-      return m;
+        int[] m = {m1, m2};
+        return m;
     }
 
     private static int partition2(int[] a, int l, int r) {
@@ -20,15 +32,17 @@ public class Sorting {
         for (int i = l + 1; i <= r; i++) {
             if (a[i] <= x) {
                 j++;
-                int t = a[i];
-                a[i] = a[j];
-                a[j] = t;
+                swap(a, j, i);
             }
         }
-        int t = a[l];
-        a[l] = a[j];
-        a[j] = t;
+        swap(a, j, l);
         return j;
+    }
+
+    private static void swap(int[] a, int j, int i) {
+        int t = a[i];
+        a[i] = a[j];
+        a[j] = t;
     }
 
     private static void randomizedQuickSort(int[] a, int l, int r) {
@@ -36,13 +50,12 @@ public class Sorting {
             return;
         }
         int k = random.nextInt(r - l + 1) + l;
-        int t = a[l];
-        a[l] = a[k];
-        a[k] = t;
+//        System.out.println("k="+k);
+        swap(a, k, l);
         //use partition3
-        int m = partition2(a, l, r);
-        randomizedQuickSort(a, l, m - 1);
-        randomizedQuickSort(a, m + 1, r);
+        int[] m = partition3(a, l, r);
+        randomizedQuickSort(a, l, m[0]);
+        randomizedQuickSort(a, m[1] + 1, r);
     }
 
     public static void main(String[] args) {
