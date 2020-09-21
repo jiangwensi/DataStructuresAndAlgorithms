@@ -1,7 +1,11 @@
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class PlacingParentheses {
 
+    private static Map<String,Integer> min = new HashMap<>();
+    private static Map<String,Integer> max = new HashMap<>();
 
     private static int[] extractDigits(int i, int j, String exp) {
         int[] digits = new int[(j - i) / 2 + 1];
@@ -24,9 +28,25 @@ public class PlacingParentheses {
         return ops;
     }
 
+    private static String getKey(int i, int j){
+        String key="";
+        String a=String.valueOf(i);
+        if(a.length()==1){
+            a="0"+a;
+        }
+        String b = String.valueOf(j);
+        if(b.length()==1){
+            b="0"+b;
+        }
+        return a+b;
+    }
+
     //from digit i to digit j in digits
     private static int getMin(int i, int j, int[] digits, char[] operators) {//max(5−8+7×4−8+9) =?
-
+        String key = getKey(i,j);
+        if(min.containsKey(key)){
+            return min.get(key);
+        }
         if (i == j) {
             return digits[i];
         }
@@ -62,11 +82,18 @@ public class PlacingParentheses {
                 returnValue = min;
             }
         }
+        min.put(key,returnValue);
         return returnValue;
     }
 
     //from digit i to digit j in digits
     private static int getMax(int i, int j, int[] digits, char[] operators) {//max(5−8+7×4−8+9) =?
+
+        String key = getKey(i,j);
+        if(max.containsKey(key)){
+            return max.get(key);
+        }
+
         if (i == j) {
             return digits[i];
         }
@@ -100,6 +127,7 @@ public class PlacingParentheses {
                 returnValue = max;
             }
         }
+        max.put(key,returnValue);
         return returnValue;
 
     }
