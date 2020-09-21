@@ -4,8 +4,8 @@ import java.util.Scanner;
 
 public class PlacingParentheses {
 
-    private static Map<String,Integer> min = new HashMap<>();
-    private static Map<String,Integer> max = new HashMap<>();
+    private static Map<String,Long> min = new HashMap<>();
+    private static Map<String,Long> max = new HashMap<>();
 
     private static int[] extractDigits(int i, int j, String exp) {
         int[] digits = new int[(j - i) / 2 + 1];
@@ -42,7 +42,7 @@ public class PlacingParentheses {
     }
 
     //from digit i to digit j in digits
-    private static int getMin(int i, int j, int[] digits, char[] operators) {//max(5−8+7×4−8+9) =?
+    private static long getMin(int i, int j, int[] digits, char[] operators) {//max(5−8+7×4−8+9) =?
         String key = getKey(i,j);
         if(min.containsKey(key)){
             return min.get(key);
@@ -50,29 +50,29 @@ public class PlacingParentheses {
         if (i == j) {
             return digits[i];
         }
-        int returnValue = Integer.MAX_VALUE;
+        long returnValue = Long.MAX_VALUE;
 //        char[] operators = extractOps(i, j, exp);
 //        int[] digits = extractDigits(i, j, exp);
 
         for (int k = i; k < j; k++) {//from operator i to operator j-1//when i = 0, j=1 -> k=0
             char ops = operators[k];
-            int min = Integer.MAX_VALUE;
+            long min = Long.MAX_VALUE;
             if (ops == '+') {
                 min = getMin(i, k, digits, operators) + getMin(k + 1, j, digits, operators);
             } else if (ops == '-') {
                 min = getMin(i, k, digits, operators) - getMax(k + 1, j, digits, operators);
             } else if (ops == '*') {
-                int a = getMin(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
+                long a = getMin(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
                 min = a;
-                int b = getMin(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
+                long b = getMin(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
                 if (b < min) {
                     min = b;
                 }
-                int c = getMax(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
+                long c = getMax(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
                 if (c < min) {
                     min = c;
                 }
-                int d = getMax(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
+                long d = getMax(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
                 if (d < min) {
                     min = d;
                 }
@@ -87,7 +87,7 @@ public class PlacingParentheses {
     }
 
     //from digit i to digit j in digits
-    private static int getMax(int i, int j, int[] digits, char[] operators) {//max(5−8+7×4−8+9) =?
+    private static long getMax(int i, int j, int[] digits, char[] operators) {//max(5−8+7×4−8+9) =?
 
         String key = getKey(i,j);
         if(max.containsKey(key)){
@@ -97,27 +97,27 @@ public class PlacingParentheses {
         if (i == j) {
             return digits[i];
         }
-        int returnValue = Integer.MIN_VALUE;
+        long returnValue = Long.MIN_VALUE;
 
         for (int k = i; k < j; k++) {//from operator i to operator j-1//when i = 0, j=1 -> k=0
             char ops = operators[k];
-            int max = Integer.MIN_VALUE;
+            long max = Long.MIN_VALUE;
             if (ops == '+') {
                 max = getMax(i, k, digits, operators) + getMax(k + 1, j, digits, operators);
             } else if (ops == '-') {
                 max = getMax(i, k, digits, operators) - getMin(k + 1, j, digits, operators);
             } else if (ops == '*') {
-                int a = getMin(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
+                long a = getMin(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
                 max = a;
-                int b = getMin(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
+                long b = getMin(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
                 if (b > max) {
                     max = b;
                 }
-                int c = getMax(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
+                long c = getMax(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
                 if (c > max) {
                     max = c;
                 }
-                int d = getMax(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
+                long d = getMax(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
                 if (d > max) {
                     max = d;
                 }
@@ -132,21 +132,21 @@ public class PlacingParentheses {
 
     }
 
-    private static int[] getMinAndMax(int i, int j, int[] digits, char[] operators) {
+    private static long[] getMinAndMax(int i, int j, int[] digits, char[] operators) {
         if (i == j) {
-            int[] r = new int[2];
+            long[] r = new long[2];
             r[0] = i;
             r[1] = i;
             return r;
         }
 
-        int min = Integer.MAX_VALUE;
-        int max = Integer.MIN_VALUE;
+        long min = Long.MAX_VALUE;
+        long max = Long.MIN_VALUE;
 
         for (int k = i; k < j; k++) {
 
-            int minV = Integer.MAX_VALUE;
-            int maxV = Integer.MIN_VALUE;
+            long minV = Long.MAX_VALUE;
+            long maxV = Long.MIN_VALUE;
             if (operators[k] == '+') {
 
                 minV = getMin(i, k, digits, operators) + getMin(k + 1, j, digits, operators);
@@ -159,11 +159,11 @@ public class PlacingParentheses {
 
             } else if (operators[k] == '*') {
 
-                int a = getMin(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
+                long a = getMin(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
                 maxV = a;
                 minV = a;
 
-                int b = getMin(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
+                long b = getMin(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
                 if (b > maxV) {
                     maxV = b;
                 }
@@ -171,7 +171,7 @@ public class PlacingParentheses {
                     minV = b;
                 }
 
-                int c = getMax(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
+                long c = getMax(i, k, digits, operators) * getMax(k + 1, j, digits, operators);
                 if (c > maxV) {
                     maxV = c;
                 }
@@ -179,7 +179,7 @@ public class PlacingParentheses {
                     minV = c;
                 }
 
-                int d = getMax(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
+                long d = getMax(i, k, digits, operators) * getMin(k + 1, j, digits, operators);
                 if (d > maxV) {
                     maxV = d;
                 }
@@ -196,7 +196,7 @@ public class PlacingParentheses {
                 max = maxV;
             }
         }
-        int[] minMax = new int[2];
+        long[] minMax = new long[2];
         minMax[0] = min;
         minMax[1] = max;
         return minMax;
@@ -209,15 +209,15 @@ public class PlacingParentheses {
         char[] operators = extractOps(0, exp.length() - 1, exp);
         int[] digits = extractDigits(0, exp.length() - 1, exp);
 
-        int[][] minimum = new int[digits.length][];
+        long[][] minimum = new long[digits.length][];
         for (int i = 0; i < digits.length; i++) {
-            minimum[i] = new int[digits.length];
+            minimum[i] = new long[digits.length];
             minimum[i][i] = digits[i];
         }
 
-        int[][] maximum = new int[digits.length][];
+        long[][] maximum = new long[digits.length][];
         for (int i = 0; i < digits.length; i++) {
-            maximum[i] = new int[digits.length];
+            maximum[i] = new long[digits.length];
             maximum[i][i] = digits[i];
         }
 
