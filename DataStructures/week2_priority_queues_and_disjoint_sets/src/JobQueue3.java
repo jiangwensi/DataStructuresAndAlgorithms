@@ -1,10 +1,8 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.StringTokenizer;
 
 
-public class JobQueue2 {
+public class JobQueue3 {
     private int numWorkers;
     private int[] jobs;
 
@@ -12,13 +10,12 @@ public class JobQueue2 {
     private long[] startTime;
 
     private Thread[] threads;
-    int minRemainingTime;
 
     private FastScanner in;
     private PrintWriter out;
 
     public static void main(String[] args) throws IOException {
-        new JobQueue2().solve();
+        new JobQueue3().solve();
     }
 
     private void readData() throws IOException {
@@ -39,38 +36,27 @@ public class JobQueue2 {
 
     private class Thread implements Comparable<Thread> {
         int index;
-        boolean occupied;
-        int currentJobRemainingTime = 0;
+        long timing = 0;
 
-        public Thread(int index, boolean occupied) {
+        public Thread(int index) {
             this.index = index;
-            this.occupied = occupied;
         }
 
         @Override
         public int compareTo(Thread o) {
-            if (this.occupied == true && o.occupied == true) {
-                return 0;
-            }
-            if (this.occupied == true && o.occupied == false) {
+            if(this.timing > o.timing){
                 return -1;
-            }
-            if (this.occupied == false && o.occupied == false) {
-                if (this.index < o.index) {
+            }if(this.timing == o.timing){
+                if(this.index<o.index){
                     return 1;
-                }
-                if (this.index == o.index) {
+                } else if(this.index==o.index){
                     return 0;
-                }
-                if (this.index > o.index) {
+                } else {
                     return -1;
                 }
-            }
-            if (this.occupied == false && o.occupied == true) {
+            } else {
                 return 1;
             }
-
-            return 0;
         }
     }
 
@@ -122,83 +108,22 @@ public class JobQueue2 {
         startTime = new long[jobs.length];
 
         for (int i = 0; i < numWorkers; i++) {
-            threads[i] = new Thread(i, false);
+            threads[i] = new Thread(i);
         }
 
         long time = -1;
         int j = 0;
 
-        while (true) {
-
-            updateThreadStatus();//nlogn
-            updateMinRemainingTime();//n
-            if (minRemainingTime > 0) {
-                time = time + minRemainingTime;
-                continue;
-            } else if (minRemainingTime == 0) {
-                time = time + 1;
-            } else {
-                System.out.println("Something went wrong. minRemainingTime=" + minRemainingTime);
-            }
-
-            boolean allJobProcessed = false;
-
-            while (j < jobs.length) {
-                Thread t = threads[0];
-                if (t.occupied) {
-                    //if the highest priority node is also occupied, meaning all are occupied, try next second
-                    break;
-                }
-
-                t.occupied = true;
-                t.currentJobRemainingTime = jobs[j];
-                assignedWorker[j] = t.index;
-                startTime[j] = time;
-
-                if (j == jobs.length - 1) {
-                    allJobProcessed = true;
-                    break;
-                }
-                j++;
-                shiftDown(0);
-            }
-            if (allJobProcessed) {
-                break;
-            }
+        for(int i =0; i < jobs.length;i++){
+            Thread t = threads[0];
+            assignedWorker[i]=t.index;
+            startTime[i]=t.timing;
+            t.timing+=jobs[i];
+            shiftDown(0);
         }
-    }
-
-    private void updateMinRemainingTime() {
-        int min = Integer.MAX_VALUE;
-        for (int i = 0; i < threads.length; i++) {
-            if (threads[i].currentJobRemainingTime < min) {
-                min = threads[i].currentJobRemainingTime;
-            }
-        }
-        minRemainingTime = min;
 
     }
 
-    private void updateThreadStatus() {
-        int advanceTime = minRemainingTime == 0 ? 1 : minRemainingTime;
-
-        for (int i = 0; i < threads.length; i++) {
-            Thread thread = threads[i];
-
-            if (thread.occupied) {
-                thread.currentJobRemainingTime = thread.currentJobRemainingTime - advanceTime;
-                if (thread.currentJobRemainingTime == 0) {
-                    thread.occupied = false;
-                    shiftUp(i);
-                }
-            }
-
-            if ((thread.occupied && thread.currentJobRemainingTime <= 0)
-                    || (!thread.occupied && thread.currentJobRemainingTime > 0)) {
-                System.out.println("something went wrong");
-            }
-        }
-    }
 
     public void solve() throws IOException {
         in = new FastScanner();
