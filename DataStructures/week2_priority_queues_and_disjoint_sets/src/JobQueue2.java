@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.StringTokenizer;
 
 
-public class JobQueue {
+public class JobQueue2 {
     private int numWorkers;
     private int[] jobs;
 
@@ -10,12 +10,13 @@ public class JobQueue {
     private long[] startTime;
 
     private Thread[] threads;
+    long minRemainingTime;
 
     private FastScanner in;
     private PrintWriter out;
 
     public static void main(String[] args) throws IOException {
-        new JobQueue().solve();
+        new JobQueue2().solve();
     }
 
     private void readData() throws IOException {
@@ -73,7 +74,7 @@ public class JobQueue {
 
     private void shiftDown(int index) {
 
-        long timeStart=System.nanoTime();
+//        long timeStart = System.nanoTime();
         int maxIndex = index;
         int leftChild = leftChild(index);
         int rightChild = rightChild(index);
@@ -89,13 +90,13 @@ public class JobQueue {
             swap(maxIndex, index);
             shiftDown(maxIndex);
         }
-        long timeEnd=System.nanoTime();
-        System.out.println("shiftDown("+index+"):"+(timeEnd-timeStart));
+//        long timeEnd = System.nanoTime();
+//        System.out.println("shiftDown(" + index + "):" + (timeEnd - timeStart));
 
     }
 
     private void shiftUp(int index) {
-        long timeStart=System.nanoTime();
+//        long timeStart = System.nanoTime();
         if (index == 0) {
             return;
         }
@@ -104,8 +105,8 @@ public class JobQueue {
             swap(index, parent);
             shiftUp(parent);
         }
-        long timeEnd=System.nanoTime();
-        System.out.println("shiftUp("+index+"):"+(timeEnd-timeStart));
+//        long timeEnd = System.nanoTime();
+//        System.out.println("shiftUp(" + index + "):" + (timeEnd - timeStart));
     }
 
     private int parentIndex(int index) {
@@ -140,30 +141,50 @@ public class JobQueue {
     }
 
     private void assignJobs() {
+
         threads = new Thread[numWorkers];
         assignedWorker = new int[jobs.length];
         startTime = new long[jobs.length];
+
         for (int i = 0; i < numWorkers; i++) {
             threads[i] = new Thread(i, false);
         }
+
         long time = -1;
         int j = 0;
-        while (true) {
-            time++;
-            boolean allJobProcessed = false;
-            updateThreadStatus();
-            while (j < jobs.length) {
 
+        while (true) {
+
+            updateThreadStatus();
+            updateMinRemainingTime();
+            if (minRemainingTime > 0) {
+                time = time + minRemainingTime;
+                continue;
+            } else if (minRemainingTime == 0) {
+                time = time + 1;
+            } else {
+                System.out.println("Something went wrong. minRemainingTime=" + minRemainingTime);
+            }
+
+            boolean allJobProcessed = false;
+
+            while (j < jobs.length) {
                 Thread t = threads[0];
                 if (t.occupied) {
+                    //if the highest priority node is also occupied, meaning all are occupied
                     break;
                 }
+
                 t.occupied = true;
                 t.currentJobRemainingTime = jobs[j];
                 assignedWorker[j] = t.index;
                 startTime[j] = time;
+
+                if (j == jobs.length - 1) {
+                    allJobProcessed = true;
+                    break;
+                }
                 j++;
-                allJobProcessed = (j == (jobs.length-1));
                 shiftDown(0);
             }
             if (allJobProcessed) {
@@ -172,43 +193,42 @@ public class JobQueue {
         }
     }
 
+    private void updateMinRemainingTime() {
+        long min = Long.MAX_VALUE;
+        for (int i = 0; i < threads.length; i++) {
+            if (threads[i].currentJobRemainingTime < min) {
+                min = threads[i].currentJobRemainingTime;
+            }
+        }
+        minRemainingTime = min;
+
+    }
+
     private void updateThreadStatus() {
-        long timeStart=System.nanoTime();
+//        long timeStart = System.nanoTime();
+        long advanceTime = minRemainingTime == 0 ? 1 : minRemainingTime;
+
         for (int i = 0; i < threads.length; i++) {
             Thread thread = threads[i];
+
             if (thread.occupied) {
-                thread.currentJobRemainingTime--;
+                thread.currentJobRemainingTime = thread.currentJobRemainingTime - advanceTime;
                 if (thread.currentJobRemainingTime == 0) {
                     thread.occupied = false;
                     shiftUp(i);
                 }
             }
-            if ((thread.occupied && thread.currentJobRemainingTime <= 0) || (!thread.occupied && thread.currentJobRemainingTime > 0)) {
+
+            if ((thread.occupied && thread.currentJobRemainingTime <= 0)
+                    || (!thread.occupied && thread.currentJobRemainingTime > 0)) {
                 System.out.println("something went wrong");
             }
         }
 
-        long timeEnd=System.nanoTime();
-        System.out.println("updateThreadStatus time used:"+(timeEnd-timeStart));
-    }
+//        long timeEnd = System.nanoTime();
+//        System.out.println("updateThreadStatus time used:" + (timeEnd - timeStart));
 
-//    private void assignJobs() {
-//        // TODO: replace this code with a faster algorithm.
-//        assignedWorker = new int[jobs.length];
-//        startTime = new long[jobs.length];
-//        long[] nextFreeTime = new long[numWorkers];
-//        for (int i = 0; i < jobs.length; i++) {
-//            int duration = jobs[i];
-//            int bestWorker = 0;
-//            for (int j = 0; j < numWorkers; ++j) {
-//                if (nextFreeTime[j] < nextFreeTime[bestWorker])
-//                    bestWorker = j;
-//            }
-//            assignedWorker[i] = bestWorker;
-//            startTime[i] = nextFreeTime[bestWorker];
-//            nextFreeTime[bestWorker] += duration;
-//        }
-//    }
+    }
 
     public void solve() throws IOException {
         in = new FastScanner();
