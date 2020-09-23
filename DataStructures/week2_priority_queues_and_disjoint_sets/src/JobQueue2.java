@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 
@@ -10,7 +12,7 @@ public class JobQueue2 {
     private long[] startTime;
 
     private Thread[] threads;
-    long minRemainingTime;
+    int minRemainingTime;
 
     private FastScanner in;
     private PrintWriter out;
@@ -36,9 +38,9 @@ public class JobQueue2 {
 
 
     private class Thread implements Comparable<Thread> {
-        int index = -1;
-        boolean occupied = false;
-        long currentJobRemainingTime = 0;
+        int index;
+        boolean occupied;
+        int currentJobRemainingTime = 0;
 
         public Thread(int index, boolean occupied) {
             this.index = index;
@@ -72,49 +74,89 @@ public class JobQueue2 {
         }
     }
 
+    private void shiftDownIterative(int index) {
+        int max = index;
+        int l = index * 2 + 1;// leftChild(index);
+        int r = index * 2 + 2;//rightChild(index);
+
+        while (l < threads.length || r < threads.length) {
+
+            if (l < threads.length && threads[max].compareTo(threads[l]) == -1) {
+                max = l;
+            }
+
+            if (r < threads.length && threads[max].compareTo(threads[r]) == -1) {
+                max = r;
+            }
+
+            if (max != index) {
+//            swap(max, index);
+
+                Thread tmp = threads[index];
+                threads[index] = threads[max];
+                threads[max] = tmp;
+
+                l=max*2+1;
+                r=max*2+2;
+                index=max;
+
+//                shiftDown(max);
+            } else{
+                break;
+            }
+        }
+
+
+    }
+
     private void shiftDown(int index) {
+        int max = index;
+        int l = index * 2 + 1;// leftChild(index);
+        int r = index * 2 + 2;//rightChild(index);
 
-//        long timeStart = System.nanoTime();
-        int maxIndex = index;
-        int leftChild = leftChild(index);
-        int rightChild = rightChild(index);
-
-        if (leftChild != -1 && threads[maxIndex].compareTo(threads[leftChild]) == -1) {
-            maxIndex = leftChild;
+        if (l < threads.length && threads[max].compareTo(threads[l]) == -1) {
+            max = l;
         }
-        if (rightChild != -1 && threads[maxIndex].compareTo(threads[rightChild]) == -1) {
-            maxIndex = rightChild;
+        if (r < threads.length && threads[max].compareTo(threads[r]) == -1) {
+            max = r;
         }
 
-        if (maxIndex != index) {
-            swap(maxIndex, index);
-            shiftDown(maxIndex);
+        if (max != index) {
+//            swap(max, index);
+
+            Thread tmp = threads[index];
+            threads[index] = threads[max];
+            threads[max] = tmp;
+
+            shiftDown(max);
         }
-//        long timeEnd = System.nanoTime();
-//        System.out.println("shiftDown(" + index + "):" + (timeEnd - timeStart));
 
     }
 
     private void shiftUp(int index) {
-//        long timeStart = System.nanoTime();
         if (index == 0) {
             return;
         }
-        int parent = parentIndex(index);
+//        int parent = parentIndex(index);
+        int parent = index == 0 ? 0 : (index - 1) / 2;
         if (threads[parent].compareTo(threads[index]) == -1) {
-            swap(index, parent);
+//            swap(index, parent);
+
+
+            Thread tmp = threads[index];
+            threads[index] = threads[parent];
+            threads[parent] = tmp;
+
             shiftUp(parent);
         }
-//        long timeEnd = System.nanoTime();
-//        System.out.println("shiftUp(" + index + "):" + (timeEnd - timeStart));
     }
 
-    private int parentIndex(int index) {
-        if (index == 0) {
-            return index;
-        }
-        return (index - 1) / 2;
-    }
+//    private int parentIndex(int index) {
+//        if (index == 0) {
+//            return index;
+//        }
+//        return (index - 1) / 2;
+//    }
 
     private void swap(int i, int j) {
         Thread tmp = threads[i];
@@ -122,6 +164,7 @@ public class JobQueue2 {
         threads[j] = tmp;
     }
 
+    //
     private int rightChild(int index) {
         int child = index * 2 + 2;
         if (child < threads.length) {
@@ -131,6 +174,7 @@ public class JobQueue2 {
         }
     }
 
+    //
     private int leftChild(int index) {
         int child = index * 2 + 1;
         if (child < threads.length) {
@@ -155,8 +199,8 @@ public class JobQueue2 {
 
         while (true) {
 
-            updateThreadStatus();
-            updateMinRemainingTime();
+            updateThreadStatus();//nlogn
+            updateMinRemainingTime();//n
             if (minRemainingTime > 0) {
                 time = time + minRemainingTime;
                 continue;
@@ -171,7 +215,7 @@ public class JobQueue2 {
             while (j < jobs.length) {
                 Thread t = threads[0];
                 if (t.occupied) {
-                    //if the highest priority node is also occupied, meaning all are occupied
+                    //if the highest priority node is also occupied, meaning all are occupied, try next second
                     break;
                 }
 
@@ -185,7 +229,8 @@ public class JobQueue2 {
                     break;
                 }
                 j++;
-                shiftDown(0);
+//                shiftDown(0);
+                shiftDownIterative(0);
             }
             if (allJobProcessed) {
                 break;
@@ -194,7 +239,7 @@ public class JobQueue2 {
     }
 
     private void updateMinRemainingTime() {
-        long min = Long.MAX_VALUE;
+        int min = Integer.MAX_VALUE;
         for (int i = 0; i < threads.length; i++) {
             if (threads[i].currentJobRemainingTime < min) {
                 min = threads[i].currentJobRemainingTime;
@@ -205,8 +250,7 @@ public class JobQueue2 {
     }
 
     private void updateThreadStatus() {
-//        long timeStart = System.nanoTime();
-        long advanceTime = minRemainingTime == 0 ? 1 : minRemainingTime;
+        int advanceTime = minRemainingTime == 0 ? 1 : minRemainingTime;
 
         for (int i = 0; i < threads.length; i++) {
             Thread thread = threads[i];
@@ -224,10 +268,6 @@ public class JobQueue2 {
                 System.out.println("something went wrong");
             }
         }
-
-//        long timeEnd = System.nanoTime();
-//        System.out.println("updateThreadStatus time used:" + (timeEnd - timeStart));
-
     }
 
     public void solve() throws IOException {
