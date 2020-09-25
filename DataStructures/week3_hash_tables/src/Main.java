@@ -8,10 +8,13 @@ public class Main {
     private static int bucketCount = 5;
 
     public static void main(String[] args) {
-        System.out.println((-2)%5);
+//        System.out.println((-2)%5);
 //        System.out.println(hashFuncMy("world"));
 //        System.out.println(hashFunc("world"));
 //        cal();
+        for(int i = 1; i < 0; i++){
+            System.out.println("i="+i);
+        }
     }
 
     private static void cal() {

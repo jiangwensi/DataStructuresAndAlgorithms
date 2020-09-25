@@ -17,21 +17,32 @@ public class HashChains {
         new HashChains().processQueries();
     }
 
-    private int hashFunc1(String s) {
-        double hash = 0;
-        for (int i = 0; i < s.length(); i++) {
-            hash += s.charAt(i) * Math.pow(multiplier, i);
-        }
-        hash = ((hash % prime) + prime) % prime;
-        hash = ((hash % bucketCount) + bucketCount) % bucketCount;
-        return (int) hash;
-    }
+//    private int hashFunc2(String s) {
+//        double hash = 0;
+//        for (int i = s.length()-1; i >=0; i--) {
+//            hash += s.charAt(i) * Math.pow(multiplier, i);
+//        }
+//        hash = ((hash % prime) + prime) % prime;
+//        hash = ((hash % bucketCount) + bucketCount) % bucketCount;
+//        return (int) hash;
+//    }
+
+//    private int hashFunc2(String s) {
+//        long hash = 0;
+//        for (int i = s.length() - 1; i >= 0; --i)
+//            hash = ((hash * multiplier + s.charAt(i)) % prime + prime) % prime;
+//        return (int) (hash % bucketCount + bucketCount) % bucketCount;
+//    }
 
     private int hashFunc2(String s) {
         long hash = 0;
         for (int i = s.length() - 1; i >= 0; --i)
-            hash = ((hash * multiplier + s.charAt(i)) % prime + prime) % prime;
-        return (int) (hash % bucketCount + bucketCount) % bucketCount;
+            hash = mod(hash * multiplier + s.charAt(i), prime);
+        return (int) mod(hash, bucketCount);
+    }
+
+    private long mod(long a, long b) {
+        return (a % b + b) % b;
     }
 
     private Query readQuery() throws IOException {
@@ -78,21 +89,27 @@ public class HashChains {
             case "del":
                 s = query.s;
                 l = hashtable[hashFunc2(s)];
+
                 if (l == null) {
                     return;
                 } else {
                     for (int i = 0; i < l.size(); i++) {
                         if (l.get(i).equals(s)) {
                             l.remove(i);
+                            if (l.size() == 0) {
+                                l = null;
+                            }
                             return;
                         }
                     }
                 }
+
                 break;
             case "find":
                 s = query.s;
                 l = hashtable[hashFunc2(s)];
                 boolean found = false;
+
                 if (l != null && l.size() != 0) {
                     for (int i = 0; i < l.size(); i++) {
                         if (l.get(i).equals(s)) {
@@ -102,10 +119,12 @@ public class HashChains {
                         }
                     }
                 }
+
                 if (!found) {
                     System.out.println("no");
                 }
                 break;
+
             case "check":
                 l = hashtable[query.ind];
 
