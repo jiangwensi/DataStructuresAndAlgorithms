@@ -1,8 +1,8 @@
-
 import java.util.*;
 import java.io.*;
 
-public class tree_height {
+public class tree_height2 {
+    private static TreeNode[] nodes;
     class FastScanner {
         StringTokenizer tok = new StringTokenizer("");
         BufferedReader in;
@@ -16,78 +16,55 @@ public class tree_height {
                 tok = new StringTokenizer(in.readLine());
             return tok.nextToken();
         }
-
         int nextInt() throws IOException {
             return Integer.parseInt(next());
         }
     }
 
+
+
     private static class TreeNode {
         int value;
         List<TreeNode> children = new ArrayList();
-
         public TreeNode(int value) {
             this.value = value;
         }
     }
 
-    private static class ElementNode {
-        int value;
-        int parent;
 
-        public ElementNode(int value, int parent) {
-            this.value = value;
-            this.parent = parent;
-        }
-    }
+    public class TreeHeight {
+        int n;
+        int parent[];
 
-    private static List<ElementNode> toElementNodeList(int[] arr) {
-        List<ElementNode> list = new ArrayList<>();
-        for (int i = 0; i < arr.length; i++) {
-            ElementNode e = new ElementNode(i, arr[i]);
-            list.add(e);
-        }
-        return list;
-    }
-
-    private static TreeNode constructTree(List<ElementNode> elementNodes) {
-        TreeNode root = null;
-        ElementNode rootElement = null;
-        for (ElementNode e : elementNodes) {
-            if (e.parent == -1) {
-                rootElement = e;
-                root = new TreeNode(e.value);
-                break;
-            }
-        }
-        elementNodes.remove(rootElement);
-
-        constructChildren(elementNodes, root);
-
-        return root;
-    }
-
-    private static void constructChildren(List<ElementNode> elementNodes, TreeNode root) {
-        if (elementNodes.size() == 0) {
-            return;
-        }
-
-        List<ElementNode> childrenElements = new LinkedList<>();
-        List<TreeNode> childrenNodes = new LinkedList<>();
-        for (ElementNode e : elementNodes) {
-            if (e.parent == root.value) {
-                childrenNodes.add(new TreeNode(e.value));
-                childrenElements.add(e);
+        void read() throws IOException {
+            FastScanner in = new FastScanner();
+            n = in.nextInt();
+            parent = new int[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = in.nextInt();
             }
         }
 
-        for(int i = 0 ;i< childrenElements.size();i++){
-            root.children.add(childrenNodes.get(i));
-            elementNodes.remove(childrenElements.get(i));
-        }
+        int computeHeight() {
+            //node value equals to node index, construct the node first
+            nodes = new TreeNode[n];
+            for(int i =0; i < n; i++){
+                nodes[i]=new TreeNode(i);
+            }
 
-        for(int i = 0 ;i< childrenElements.size();i++){
-            constructChildren(elementNodes,childrenNodes.get(i));
+            //construct tree
+            int rootIndex=-1;
+            for(int i =0; i<n;i++){
+                int parentIndex = parent[i];
+                if(parentIndex==-1){
+                    rootIndex = i;
+                } else{
+                    nodes[parentIndex].children.add(nodes[i]);
+                }
+            }
+            TreeNode root = nodes[rootIndex];
+
+            return getChildrenHeight(root)+1;
         }
     }
 
@@ -107,51 +84,16 @@ public class tree_height {
         return childrenHeight;
     }
 
-    public class TreeHeight {
-        int n;
-        int parent[];
-
-        void read() throws IOException {
-            FastScanner in = new FastScanner();
-            n = in.nextInt();
-            parent = new int[n];
-            for (int i = 0; i < n; i++) {
-                parent[i] = in.nextInt();
-            }
-        }
-
-        int computeHeight() {
-
-            List<ElementNode> elementList = toElementNodeList(parent);
-            TreeNode root = constructTree(elementList);
-            return getChildrenHeight(root) + 1;
-        }
-
-
-//		int computeHeight() {
-//                        // Replace this code with a faster implementation
-//			int maxHeight = 0;
-//			for (int vertex = 0; vertex < n; vertex++) {
-//				int height = 0;
-//				for (int i = vertex; i != -1; i = parent[i])
-//					height++;
-//				maxHeight = Math.max(maxHeight, height);
-//			}
-//			return maxHeight;
-//		}
-    }
-
     static public void main(String[] args) throws IOException {
         new Thread(null, new Runnable() {
             public void run() {
                 try {
-                    new tree_height().run();
+                    new tree_height2().run();
                 } catch (IOException e) {
                 }
             }
         }, "1", 1 << 26).start();
     }
-
     public void run() throws IOException {
         TreeHeight tree = new TreeHeight();
         tree.read();

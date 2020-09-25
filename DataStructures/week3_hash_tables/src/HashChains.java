@@ -11,42 +11,22 @@ public class HashChains {
     private int bucketCount;
     private int prime = 1000000007;
     private int multiplier = 263;
-    private List<String>[] hashtable = new LinkedList[multiplier];
+    private List<String>[] hashtable ;
 
     public static void main(String[] args) throws IOException {
         new HashChains().processQueries();
     }
 
-//    private int hashFunc2(String s) {
-//        double hash = 0;
-//        for (int i = s.length()-1; i >=0; i--) {
-//            hash += s.charAt(i) * Math.pow(multiplier, i);
-//        }
-//        hash = ((hash % prime) + prime) % prime;
-//        hash = ((hash % bucketCount) + bucketCount) % bucketCount;
-//        return (int) hash;
-//    }
-
-//    private int hashFunc2(String s) {
-//        long hash = 0;
-//        for (int i = s.length() - 1; i >= 0; --i)
-//            hash = ((hash * multiplier + s.charAt(i)) % prime + prime) % prime;
-//        return (int) (hash % bucketCount + bucketCount) % bucketCount;
-//    }
-
-    private int hashFunc2(String s) {
+    private int hashFunc(String s) {
         long hash = 0;
         for (int i = s.length() - 1; i >= 0; --i)
-            hash = mod(hash * multiplier + s.charAt(i), prime);
-        return (int) mod(hash, bucketCount);
-    }
-
-    private long mod(long a, long b) {
-        return (a % b + b) % b;
+            hash = (hash * multiplier + s.charAt(i)) % prime;
+        return (int) hash % bucketCount;
     }
 
     private Query readQuery() throws IOException {
         String type = in.next();
+
         if (!type.equals("check")) {
             String s = in.next();
             return new Query(type, s);
@@ -56,31 +36,52 @@ public class HashChains {
         }
     }
 
-    private void writeSearchResult(boolean wasFound) {
-        out.println(wasFound ? "yes" : "no");
-        // Uncomment the following if you want to play with the program interactively.
-        // out.flush();
+    private void printHashTable() {
+        if (hashtable == null) {
+            System.out.println("hashtable is null");
+            return;
+        }
+        if (hashtable.length == 0) {
+            System.out.println("hashtable length is 0");
+            return;
+        }
+        for (int i = 0; i < hashtable.length; i++) {
+            if (hashtable[i] == null) {
+//                System.out.println("hashtable[" + i + "] is null");
+            } else {
+                System.out.println("hashtable[" + i + "]:");
+                for (int j = 0; j < hashtable[i].size(); j++) {
+                    System.out.print(hashtable[i].get(j)+" ");
+                }
+                System.out.println();
+            }
+        }
     }
 
     private void processQuery(Query query) {
-        String s;
+//        printHashTable();
+//        printQuery(query);
+        String s = query.s;
         List l;
-        int hash;
+        int hash = -1;
+        if (s != null) {
+            hash = hashFunc(s);
+        }
+
         switch (query.type) {
             case "add":
                 s = query.s;
-                hash = hashFunc2(s);
                 l = hashtable[hash];
 
-                if (l == null) {
-                    l = new LinkedList();
-                    hashtable[hash] = l;
-                } else {
+                if (l != null) {
                     for (int i = 0; i < l.size(); i++) {
                         if (l.get(i).equals(s)) {
                             return;
                         }
                     }
+                } else {
+                    l = new LinkedList();
+                    hashtable[hash] = l;
                 }
 
                 l.add(0, s);
@@ -88,16 +89,14 @@ public class HashChains {
                 break;
             case "del":
                 s = query.s;
-                l = hashtable[hashFunc2(s)];
+                l = hashtable[hash];
 
-                if (l == null) {
-                    return;
-                } else {
+                if (l != null) {
                     for (int i = 0; i < l.size(); i++) {
                         if (l.get(i).equals(s)) {
                             l.remove(i);
                             if (l.size() == 0) {
-                                l = null;
+                                hashtable[hash] = null;
                             }
                             return;
                         }
@@ -107,10 +106,10 @@ public class HashChains {
                 break;
             case "find":
                 s = query.s;
-                l = hashtable[hashFunc2(s)];
+                l = hashtable[hash];
                 boolean found = false;
 
-                if (l != null && l.size() != 0) {
+                if (l != null) {
                     for (int i = 0; i < l.size(); i++) {
                         if (l.get(i).equals(s)) {
                             System.out.println("yes");
@@ -143,12 +142,17 @@ public class HashChains {
         }
     }
 
+    private void printQuery(Query query) {
+        System.out.println("\n**type:"+query.type + ",s:"+query.s +",ind:"+ query.ind);
+    }
+
     public void processQueries() throws IOException {
         elems = new ArrayList<>();
         in = new FastScanner();
         out = new PrintWriter(new BufferedOutputStream(System.out));
         bucketCount = in.nextInt();
         int queryCount = in.nextInt();
+        hashtable= new LinkedList[bucketCount];
         for (int i = 0; i < queryCount; ++i) {
             processQuery(readQuery());
         }
