@@ -38,12 +38,12 @@ public class Dijkstra {
 
     private static long dijkstra(ArrayList<Integer>[] adj, ArrayList<Integer>[] cost, int s, int t) {
 
-        int[] prev = new int[adj.length];
+//        int[] prev = new int[adj.length];
         long[] dist = new long[adj.length];
-        boolean[] processed = new boolean[adj.length];
-        for (int i = 0; i < adj.length; i++) {
-            prev[i] = -1;
-        }
+//        boolean[] processed = new boolean[adj.length];
+//        for (int i = 0; i < adj.length; i++) {
+////            prev[i] = -1;
+//        }
         for (int i = 0; i < adj.length; i++) {
             dist[i] = Long.MAX_VALUE;
         }
@@ -65,7 +65,7 @@ public class Dijkstra {
                 int v = adjVertices.get(i);
                 if (dist[u] != Long.MAX_VALUE && dist[v] > dist[u] + weight.get(i)) {
                     dist[v] = dist[u] + weight.get(i);
-                    prev[v] = u;
+//                    prev[v] = u;
                     shiftUp(minHeap, v, dist);
                 }
             }
