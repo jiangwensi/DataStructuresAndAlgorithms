@@ -28,85 +28,59 @@ public class InverseBWT3 {
 
     String inverseBWT(String bwt) {
 
-        //build empty matrix
+        //build matrixStart for first column in bwt matrix
+        //col1 is char, col2 is order
+        int[][] matrixStart = new int[bwt.length()][];
+        for (int i = 0; i < matrixStart.length; i++) {
+            matrixStart[i] = new int[2];
+        }
 
         char[] chars = bwt.toCharArray();
         char[] charsSorted = sortChars(chars);
-        int[][] matrix0 = new int[bwt.length()][];
-        for (int i = 0; i < matrix0.length; i++) {
-            matrix0[i] = new int[2];
-        }
-
-        int[] count1 = new int[5];
-        for (int i = 0; i < matrix0.length; i++) {
-            matrix0[i][0]=charToInteger(charsSorted[i]);
-            matrix0[i][1]=count1[charToInteger(charsSorted[i])];
-        }
-
-        int[][] matrix1 = new int[bwt.length()][];
-        for (int i = 0; i < matrix1.length; i++) {
-            matrix1[i] = new int[2];
-        }
-
-        int[] count2 = new int[5];
-        for (int i = 0; i < matrix1.length; i++) {
-            matrix1[i][0]=charToInteger(chars[i]);
-            matrix1[i][1]=count2[charToInteger(chars[i])];
-        }
-
-//        ArrayList<Integer>[][] pos=new ArrayList[2][];//first and last column
-//        for(int i = 0; i < pos.length; i ++){
-//            pos[i]= new ArrayList[5];//5 char
-//        }
-//        for(int p = 0; p < matrix0.length; p ++){
-//            pos[0][matrix0[p][0]].add(p);
-//        }
-//        for(int p = 0; p < matrix1.length; p ++){
-//            pos[1][matrix1[p][1]].add(p);
-//        }
-
-        ArrayList<Integer>[] pos0 = new ArrayList[5];//5 char
-        for(int i = 0; i < pos0.length; i ++){
-            pos0[i]=new ArrayList<>();//order
-        }
-
-        for(int i = 0; i < matrix0.length; i ++){
-            pos0[matrix0[i][0]].add(i);
-        }
-
-        ArrayList<Integer>[] pos1 = new ArrayList[5];//5 char
-        for(int i = 0; i < pos1.length; i ++){
-            pos1[i]=new ArrayList<>();//order
-        }
-
-        for(int i = 0; i < matrix1.length; i ++){
-            pos1[matrix1[i][0]].add(i);
-        }
-
-        int[] order0 = new int[bwt.length()];//index is position, value is the char order
         int[] count = new int[5];
-        for(int i = 0; i < charsSorted.length;i++){
-            order0[i]=++count[charToInteger(charsSorted[i])];
+        for (int i = 0; i < matrixStart.length; i++) {
+            matrixStart[i][0]=charToInteger(charsSorted[i]);
+            matrixStart[i][1]=count[charToInteger(charsSorted[i])];
         }
 
-        int[] order1 = new int[bwt.length()];//index is position, value is the char order
+        //build matrixStart for last column in bwt matrix
+        //col1 is char, col2 is order
+        int[][] matrixEnd = new int[bwt.length()][];
+        for (int i = 0; i < matrixEnd.length; i++) {
+            matrixEnd[i] = new int[2];
+        }
+
+        count = new int[5];
+        for (int i = 0; i < matrixEnd.length; i++) {
+            matrixEnd[i][0]=charToInteger(chars[i]);
+            matrixEnd[i][1]=count[charToInteger(chars[i])];
+        }
+
+        //build pos arr for matrixStart, col1 is char, col2 is order, value is pos in column 1
+        ArrayList<Integer>[] posInMatrixStart = new ArrayList[5];//5 char
+        for(int i = 0; i < posInMatrixStart.length; i ++){
+            posInMatrixStart[i]=new ArrayList<>();//order
+        }
+
+        for(int i = 0; i < matrixStart.length; i ++){
+            posInMatrixStart[matrixStart[i][0]].add(i);
+        }
+
+        //build order arr for matrixEnd, what's the char order in a position
+        int[] orderInMatrixEnd = new int[bwt.length()];//index is position, value is the char order
         count = new int[5];
         for(int i = 0; i < chars.length;i++){
-            order1[i]=++count[charToInteger(chars[i])];
+            orderInMatrixEnd[i]=++count[charToInteger(chars[i])];
         }
 
         StringBuilder result = new StringBuilder();
 
         int index = 0;
         while(result.length()<bwt.length()){
-            result.append(integerToChar(matrix0[index][0]));
-
-            int match = matrix1[index][0];
-//            index = pos0[match].get(order0[index]-1);
-            index = pos0[match].get(order1[index]-1);
+            result.append(integerToChar(matrixStart[index][0]));
+            int match = matrixEnd[index][0];
+            index = posInMatrixStart[match].get(orderInMatrixEnd[index]-1);
         }
-
-
         return result.reverse().toString();
     }
 
