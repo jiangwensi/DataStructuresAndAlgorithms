@@ -1,9 +1,9 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.StringTokenizer;
 
 public class InverseBWT3 {
@@ -27,76 +27,114 @@ public class InverseBWT3 {
     }
 
     String inverseBWT(String bwt) {
-        StringBuilder result = new StringBuilder();
 
         //build empty matrix
+
         char[] chars = bwt.toCharArray();
-        char[][] matrix = new char[bwt.length()][];
-        for (int i = 0; i < matrix.length; i++) {
-            matrix[i] = new char[matrix.length];
-        }
-
-        //sort bwt char
         char[] charsSorted = sortChars(chars);
-
-        for (int i = 0; i < matrix.length; i++) {
-            matrix[i][0] = charsSorted[i];
-            matrix[i][matrix.length - 1] = chars[i];
+        int[][] matrix0 = new int[bwt.length()][];
+        for (int i = 0; i < matrix0.length; i++) {
+            matrix0[i] = new int[2];
         }
 
-        char[][] helper = new char[matrix.length][];
-        char[][] helperSortd = new char[matrix.length][];
-
-        for (int endIndex = 1; endIndex < matrix.length - 1; endIndex++) {
-            for (int i = 0; i < matrix.length; i++) {
-                helper[i] = new char[endIndex+1];
-            }
-
-            for (int i = 0; i < matrix.length; i++) {
-                helper[i][0] = chars[i];
-                for (int j = 0; j < endIndex; j++) {
-                    helper[i][j+1] = matrix[i][j];
-                }
-            }
-
-            char[][] sortedHelper = sortArr(helper,matrix,endIndex);
-
-            for (int i = 0; i < matrix.length; i++) {
-                matrix[i][endIndex] = sortedHelper[i][endIndex];
-            }
-            int i = 0;
+        int[] count1 = new int[5];
+        for (int i = 0; i < matrix0.length; i++) {
+            matrix0[i][0]=charToInteger(charsSorted[i]);
+            matrix0[i][1]=count1[charToInteger(charsSorted[i])];
         }
 
-        for (int i = 0; i < matrix.length - 1; i++) {
-            result.append(matrix[0][i + 1]);
+        int[][] matrix1 = new int[bwt.length()][];
+        for (int i = 0; i < matrix1.length; i++) {
+            matrix1[i] = new int[2];
         }
-        result.append("$");
-        return result.toString();
+
+        int[] count2 = new int[5];
+        for (int i = 0; i < matrix1.length; i++) {
+            matrix1[i][0]=charToInteger(chars[i]);
+            matrix1[i][1]=count2[charToInteger(chars[i])];
+        }
+
+//        ArrayList<Integer>[][] pos=new ArrayList[2][];//first and last column
+//        for(int i = 0; i < pos.length; i ++){
+//            pos[i]= new ArrayList[5];//5 char
+//        }
+//        for(int p = 0; p < matrix0.length; p ++){
+//            pos[0][matrix0[p][0]].add(p);
+//        }
+//        for(int p = 0; p < matrix1.length; p ++){
+//            pos[1][matrix1[p][1]].add(p);
+//        }
+
+        ArrayList<Integer>[] pos0 = new ArrayList[5];//5 char
+        for(int i = 0; i < pos0.length; i ++){
+            pos0[i]=new ArrayList<>();//order
+        }
+
+        for(int i = 0; i < matrix0.length; i ++){
+            pos0[matrix0[i][0]].add(i);
+        }
+
+        ArrayList<Integer>[] pos1 = new ArrayList[5];//5 char
+        for(int i = 0; i < pos1.length; i ++){
+            pos1[i]=new ArrayList<>();//order
+        }
+
+        for(int i = 0; i < matrix1.length; i ++){
+            pos1[matrix1[i][0]].add(i);
+        }
+
+        int[] order0 = new int[bwt.length()];//index is position, value is the char order
+        int[] count = new int[5];
+        for(int i = 0; i < charsSorted.length;i++){
+            order0[i]=++count[charToInteger(charsSorted[i])];
+        }
+
+        int[] order1 = new int[bwt.length()];//index is position, value is the char order
+        count = new int[5];
+        for(int i = 0; i < chars.length;i++){
+            order1[i]=++count[charToInteger(chars[i])];
+        }
+
+        StringBuilder result = new StringBuilder();
+
+        int index = 0;
+        while(result.length()<bwt.length()){
+            result.append(integerToChar(matrix0[index][0]));
+
+            int match = matrix1[index][0];
+//            index = pos0[match].get(order0[index]-1);
+            index = pos0[match].get(order1[index]-1);
+        }
+
+
+        return result.reverse().toString();
     }
 
-    private char[][] sortArr(char[][] helper,char[][] matrix,int endIndex) {
-        HashMap<char[],Integer> sortedSection = new HashMap<>();
-        for(int i = 0; i < matrix.length; i ++){
-            sortedSection.put(Arrays.copyOf(matrix[i],endIndex),i);
-        }
-
-        HashMap<char[],char[]> helperWholeToSortedMap = new HashMap<>();
-        for(int i = 0; i < matrix.length; i ++){
-            helperWholeToSortedMap.put(helper[i],Arrays.copyOf(helper[i],endIndex));
-        }
-
-        char[][] sortedHelper = new char[helper.length][];
-        for(int i = 0; i < helper[0].length;i++){
-            sortedHelper[i]=new char[helper[0].length];
-        }
-
-        for(int i = 0; i < helper.length; i ++){
-            System.out.println(helper[i]);
-            System.out.println(helperWholeToSortedMap.get(helper[i]));
-            System.out.println(sortedSection.get(helperWholeToSortedMap.get(helper[i])));
-            sortedHelper[sortedSection.get(helperWholeToSortedMap.get(helper[i]))]=helper[i];
-        }
-        return sortedHelper;
+    private void sortArr(char[][] helper) {
+        Arrays.sort(helper, new Comparator<char[]>() {
+            @Override
+            public int compare(char[] o1, char[] o2) {
+                int index = -1;
+                for (int i = 0; i < o1.length; i++) {
+                    if (o1[i] != o2[i]) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index == -1) {
+                    //equal if all characters are same
+                    return 0;
+                } else {
+                    if (o1[index] > o2[index]) {
+                        return 1;
+                    } else if (o1[index] < o2[index]) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                }
+            }
+        });
     }
 
     private char[] sortChars(char[] chars) {
