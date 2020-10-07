@@ -24,21 +24,13 @@ public class LargestNumber {
         return result;
     }
 
-    private static boolean isGreaterOrEqual(String digit, String max) {
-        int len = min(digit.length(), max.length());
-        for (int i = 0; i < len; i++) {
-            if (digit.charAt(i) > max.charAt(i)) {
-                return true;
-            }
-            if (digit.charAt(i) < max.charAt(i)) {
-                return false;
-            }
-        }
-        if(digit.length()<=max.length()){
+    private static boolean isGreaterOrEqual(String a, String b) {
+        String ab = a + b;
+        String ba = b + a;
+        if (ab.compareTo(ba) >= 0) {
             return true;
-        }else {
-            return false;
         }
+        return false;
     }
 
     private static int min(int a, int b) {
