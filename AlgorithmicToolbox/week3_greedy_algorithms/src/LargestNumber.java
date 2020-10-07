@@ -12,7 +12,7 @@ public class LargestNumber {
             String maxDigit = digits.get(0);
             int maxIndex = 0;
             for (int i = 0; i < digits.size(); i++) {
-                if (isGreaterOrEqual(digits.get(i) , maxDigit)) {
+                if (isGreaterOrEqual(digits.get(i), maxDigit)) {
                     maxDigit = digits.get(i);
                     maxIndex = i;
                 }
@@ -26,24 +26,23 @@ public class LargestNumber {
 
     private static boolean isGreaterOrEqual(String digit, String max) {
         int len = min(digit.length(), max.length());
-        for(int i = 0; i < len; i ++){
-            if(digit.length()<=i){
-                return false;
-            }
-            if(max.length()<=i){
+        for (int i = 0; i < len; i++) {
+            if (digit.charAt(i) > max.charAt(i)) {
                 return true;
             }
-            if(digit.charAt(i)>=max.charAt(i)){
-                return true;
-            } else {
+            if (digit.charAt(i) < max.charAt(i)) {
                 return false;
             }
         }
-        return true;
+        if(digit.length()<=max.length()){
+            return true;
+        }else {
+            return false;
+        }
     }
 
     private static int min(int a, int b) {
-        if(a<b){
+        if (a < b) {
             return a;
         } else {
             return b;
