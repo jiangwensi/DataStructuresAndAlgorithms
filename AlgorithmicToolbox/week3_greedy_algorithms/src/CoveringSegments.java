@@ -1,117 +1,81 @@
+
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CoveringSegments {
 
-    private static Point getPoint(List<Point> points, int coordinate) {
-
-        List<Point> result = points.stream().filter(p -> p.coordinate == coordinate).collect(Collectors.toList());
-        if (result.size() == 0) {
-            return null;
-        } else {
-            return result.get(0);
-        }
-    }
-
-    private static boolean stillHasUnmarkedSegments(Segment[] segments) {
-        return Arrays.stream(segments).filter(s -> s.marked == false).collect(Collectors.toList()).size() > 0;
-    }
-
     private static int[] optimalPoints(Segment[] segments) {
-        //key = point coordinate
-        //value = point
-        int count = 0;
-        List<Point> result = new ArrayList<>();
-        List<Point> allPoints = new ArrayList<>();
+        //write your code here
+        List points = new LinkedList();
 
-        //init points with 0 intersecting segments
-        for (Segment s : segments) {
-            int start = s.start;
-            int end = s.end;
-
-            Point p = getPoint(allPoints, start);
-            if (p == null) {
-                p = new Point();
-                p.coordinate = start;
-                allPoints.add(p);
-            }
-//            p.numberOfIntersectSegments++;
-//            p.segments.add(s);
-
-            p = getPoint(allPoints, end);
-            if (p == null) {
-                p = new Point();
-                p.coordinate = end;
-                allPoints.add(p);
-            }
-//            p.numberOfIntersectSegments++;
-//            p.segments.add(s);
-        }
-
-        //update points with segments
-        for (Point p : allPoints) {
-            for (Segment s : segments) {
-                if (s.start <= p.coordinate && s.end >= p.coordinate) {
-                    p.segments.add(s);
-                }
-            }
-        }
-        Collections.sort(allPoints, new Comparator<Point>() {
+        Arrays.sort(segments, new Comparator<Segment>() {
             @Override
-            public int compare(Point o1, Point o2) {
-                if (o1.segments.size() > o2.segments.size()) {
-                    return -1;
-                } else if (o1.segments.size() == o2.segments.size()) {
-                    return 0;
-                } else {
-                    return 1;
-                }
+            public int compare(Segment o1, Segment o2) {
+                return o1.start - o2.start;
             }
         });
 
-        while (stillHasUnmarkedSegments(segments)) {
-            for (Point p : allPoints) {
-                if (!p.marked) {
-                    result.add(p);
-                    p.segments.forEach(s -> {
-                        s.marked = true;
-                        allPoints.stream().filter(e -> e.coordinate == s.start || e.coordinate == s.end).forEach(e -> e.marked =
-                                true);
-                    });
-                    p.marked = true;
-                    count++;
+//        List<Segment> segmentList = new LinkedList(Arrays.asList(segments));
+
+        int size = segments.length;
+        while (!allProcessed(segments)) {
+//            List<Integer> intersectingIndex = new LinkedList<>();
+            Segment curSegment = segments[firstUnprocessed(segments,0)];
+            for (int j = 0; j < segments.length; j++) {
+                int firstUnprocessed = firstUnprocessed(segments,j);
+                if(firstUnprocessed==-1){
+                    break;
+                }
+                Segment checkSegment = segments[firstUnprocessed];
+                if (!checkSegment.processed) {
+                    if (isIntersect(curSegment, checkSegment)) {
+                        curSegment.start = Integer.max(curSegment.start, checkSegment.start);
+                        curSegment.end = Integer.min(curSegment.end, checkSegment.end);
+                        checkSegment.processed = true;
+//                    intersectingIndex.add(j);
+                    } else {
+                        break;
+                    }
                 }
             }
+            points.add(curSegment.start);
+//            for (int i = 0; i < intersectingIndex.size(); i++) {
+//                segmentList.remove((int) intersectingIndex.get(i));
+//            }
+//            intersectingIndex.forEach(e -> segmentList.remove((int) e));
         }
 
-        int[] resultPoints = new int[result.size()];
-        for (int i = 0; i < result.size(); i++) {
-            resultPoints[i] = result.get(i).coordinate;
+        return points.stream().mapToInt(p -> (Integer) p).toArray();
+    }
+
+    private static int firstUnprocessed(Segment[] segments, int index){
+        for(int i = index; i < segments.length; i ++){
+            if(!segments[i].processed){
+                return i;
+            }
         }
-        return resultPoints;
+        return -1;
+    }
+
+    private static boolean allProcessed(Segment[] segments){
+        for(int i = 0;i < segments.length;i++){
+            if(!segments[i].processed){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isIntersect(Segment cur, Segment check) {
+        return cur.end >= check.start;
     }
 
     private static class Segment {
         int start, end;
-        boolean marked = false;
+        boolean processed = false;
 
         Segment(int start, int end) {
             this.start = start;
             this.end = end;
-            marked = false;
-        }
-    }
-
-    private static class Point {
-        int coordinate;
-        List<CoveringSegments.Segment> segments = new ArrayList<>();
-        boolean marked = false;
-
-        public Point() {
-        }
-
-        public Point(int coordinate) {
-            this.coordinate = coordinate;
         }
     }
 
@@ -132,20 +96,4 @@ public class CoveringSegments {
         }
     }
 }
-
-/*
-pseudo codes:
-class Point {
-    int coordinate;
-    int intersectPoints;
-}
-store all starting and ending points in array points, sort by intersectPoints in descending order
-while (segments is not empty) {
-    remove all segments has points[0];
-    remove points[0];
-    count++;
-}
-return count;
-
- */
  
