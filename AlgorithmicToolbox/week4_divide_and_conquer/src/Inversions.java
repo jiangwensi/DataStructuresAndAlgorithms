@@ -2,6 +2,18 @@ import java.util.*;
 
 public class Inversions {
 
+    private static long naiveSolution (int [] arr, int[] result, int left, int right){
+        long count = 0;
+        for(int i = 0; i < arr.length; i ++){
+            for(int j = i; j< arr.length; j++){
+                if(arr[i]>arr[j]){
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     private static long getNumberOfInversions(int[] arr, int[] result, int left, int right) {
 
         long numLeftInv = 0;
@@ -48,17 +60,23 @@ public class Inversions {
         if (l < sortedLeft.length) {
             for (int index = l; index < sortedLeft.length; index++) {
                 sortedArr[i] = sortedLeft[l];
+                i++;
+                l++;
             }
         }
         if (r < sortedRight.length) {
             for (int index = r; index < sortedRight.length; index++) {
                 sortedArr[i] = sortedRight[r];
+                i++;
+                r++;
             }
         }
         return invCount;
     }
 
     public static void main(String[] args) {
+//        stressTest();
+
         Scanner scanner = new Scanner(System.in);
         int n = scanner.nextInt();
         int[] a = new int[n];
@@ -67,6 +85,25 @@ public class Inversions {
         }
         int[] b = new int[n];
         System.out.println(getNumberOfInversions(a, b, 0, a.length));
+//        System.out.println(naiveSolution(a, b, 0, a.length));
+    }
+
+    private static void stressTest() {
+        while(true){
+            int n = new Random().nextInt(5)+1;
+            System.out.println("\n\n"+n);
+            int[] a = new int[n];
+            for (int i = 0; i < n; i++) {
+                a[i] = new Random().nextInt(5)+1;
+                System.out.print(a[i]+" ");
+            }
+            int[] b = new int[n];
+            long advanced = getNumberOfInversions(a, b, 0, a.length);
+            long naive = naiveSolution(a, b, 0, a.length);
+            if(Long.compare(advanced,naive)!=0){
+                System.out.println("mismatch: advanced="+advanced+",naive="+naive);
+                break;
+            }
+        }
     }
 }
-
