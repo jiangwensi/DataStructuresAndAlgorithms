@@ -7,12 +7,13 @@ public class PointsAndSegments {
         int[] cnt = new int[points.length];
         //write your code here
 
+        int[] startSorted = mergeSortIntArr(starts, 0, starts.length, false);
+        int[] endSorted = mergeSortIntArr(ends, 0, ends.length, false);
         for (int i = 0; i < points.length; i++) {
             int l = -1;//number of segments having left end point to the left of x or equal to x
             int r = -1;//number of segments having right end point to the right of x of equal to x
 
-            int[] startSorted = mergeSortIntArr(starts, 0, starts.length, false);
-            l = bs(startSorted, 0, startSorted.length-1, points[i])+1;
+            l = bs(startSorted, 0, startSorted.length-1, points[i],false)+1;
 
 //            for (int s = 0; s < startSorted.length; s++) {
 //                if (startSorted[s] > points[i]) {
@@ -24,9 +25,8 @@ public class PointsAndSegments {
 //            if (l == -1) {
 //                l = startSorted.length;
 //            }
-
-            int[] endSorted = mergeSortIntArr(ends, 0, ends.length, false);
-            r = endSorted.length - bs(endSorted, 0, endSorted.length-1, points[i])-1;
+            int endBsResult = bs(endSorted, 0, endSorted.length-1, points[i],true);
+            r = endSorted.length - endBsResult-1;
 //            for (int e = 0; e < ends.length; e++) {
 //                if (endSorted[e] < points[i]) {
 //                    r = e - 1 + 1;
@@ -43,19 +43,38 @@ public class PointsAndSegments {
         return cnt;
     }
 
-    private static int bs(int[] sorted, int left, int right, int point) {
+    private static int bs(int[] sorted, int left, int right, int point,boolean searchingRightBound) {
 
         if (right < left) {
-            return left - 1;
+                return left -1;
         }
         int mid = (left + right) / 2;
 
         if (point < sorted[mid]) {
-            return bs(sorted, left, mid - 1, point);
+            return bs(sorted, left, mid - 1, point,searchingRightBound);
         } else if (point > sorted[mid]) {
-            return bs(sorted, mid + 1, right, point);
+            return bs(sorted, mid + 1, right, point,searchingRightBound);
         } else {
-            return mid;
+            int i = mid;
+            if(!searchingRightBound){
+                while(i<sorted.length-1){
+                    if(sorted[i+1]==sorted[mid]){
+                        i++;
+                    } else{
+                        break;
+                    }
+                }
+            } else {
+                while(i>0){
+                    if(sorted[i-1]==sorted[mid]){
+                        i--;
+                    } else{
+                        break;
+                    }
+                }
+                i--;
+            }
+            return i;
         }
     }
 
