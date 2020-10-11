@@ -49,7 +49,9 @@ class Buffer {
                 startTime = request.arrival_time;
             }
         }
-        finish_time_.add(startTime + request.process_time);
+        if(startTime!=-1){
+            finish_time_.add(startTime + request.process_time);
+        }
         return new Response(false, startTime);
 
     }
