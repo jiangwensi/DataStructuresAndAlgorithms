@@ -55,30 +55,29 @@ public class StackWithMax {
 
     private class MyStack {
         MyNode head = new MyNode();
-        MyNode maxStackHead = new MyNode();
 
         public void push(Integer value) {
-
-            MyNode myNode = new MyNode(value, head.next);
-            head.next = myNode;
-
             int max;
-            if (maxStackHead.next == null) {
+            if (head.next == null) {
                 max = value;
             } else {
-                max = maxStackHead.next.value > value ? maxStackHead.next.value : value;
+                if (head.next.max < value) {
+                    max = value;
+                } else {
+                    max = head.next.max;
+                }
             }
-            MyNode maxNode = new MyNode(max, maxStackHead.next);
-            maxStackHead.next = maxNode;
+            head.next = new MyNode(value, head.next, max);
         }
 
         public void pop() {
+            MyNode preNext = head.next;
             head.next = head.next.next;
-            maxStackHead.next = maxStackHead.next.next;
+            preNext.next = null;
         }
 
         public int max() {
-            return maxStackHead.next.value;
+            return head.next.max;
         }
     }
 
@@ -86,6 +85,7 @@ public class StackWithMax {
 
         MyNode next;
         int value;
+        int max;
 
         public MyNode() {
         }
@@ -100,6 +100,12 @@ public class StackWithMax {
 
         public MyNode(int value, MyNode next) {
             this.next = next;
+            this.value = value;
+        }
+
+        public MyNode(int value, MyNode next, int max) {
+            this.next = next;
+            this.max = max;
             this.value = value;
         }
     }
