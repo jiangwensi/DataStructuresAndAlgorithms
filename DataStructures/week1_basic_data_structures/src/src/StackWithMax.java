@@ -69,14 +69,12 @@ public class StackWithMax {
                 max = maxStackHead.next.value > value ? maxStackHead.next.value : value;
             }
             MyNode maxNode = new MyNode(max, maxStackHead.next);
-            maxStackHead.next=maxNode;
+            maxStackHead.next = maxNode;
         }
 
         public void pop() {
-            MyNode myNode = head.next;
             head.next = head.next.next;
-
-            maxStackHead.next=maxStackHead.next.next;
+            maxStackHead.next = maxStackHead.next.next;
         }
 
         public int max() {
