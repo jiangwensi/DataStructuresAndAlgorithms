@@ -1,4 +1,4 @@
-This repository contains the assignments of the below courses in Data Structures and Algorithms Specialization offered by University of California San Diego and National Research University Higher School of Economics.
+This repository contains the assignments of the below courses from <b>Data Structures and Algorithms</b> Specialization offered by University of California San Diego and National Research University Higher School of Economics.
 
 Course 1: Algorithmic Toolbox<br/>
 https://www.coursera.org/learn/algorithmic-toolbox
